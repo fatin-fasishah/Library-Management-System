@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Library Print Service</title>
+    <style>
+        body { background-color:#F5F3EF; font-family:Georgia,serif; }
+        .btn { padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-size:14px; margin:4px; font-family:Georgia,serif; }
+        .btn-submit  { background-color:#4A7C59; color:white; }
+        .btn-view    { background-color:#2E6DA4; color:white; }
+        .btn-search  { background-color:#8B6914; color:white; }
+        .btn-edit    { background-color:#C47B2B; color:white; font-size:12px; padding:6px 12px; }
+        .btn-delete  { background-color:#B03A3A; color:white; font-size:12px; padding:6px 12px; }
+        .btn-cancel  { background-color:#888; color:white; }
+        .btn:hover   { opacity:0.85; }
+        .panel { background:#EBE6E5; border-radius:8px; padding:24px; max-width:900px; margin:0 auto 24px; }
+        .panel-wide { max-width:98%; }
+        .hidden { display:none; }
+        input[type=text], select { padding:6px 10px; border:1px solid #ccc; border-radius:4px; font-family:Georgia,serif; }
+        label { font-weight:bold; }
+        .action-bar { margin:18px 0; }
+        .search-box { padding:8px 12px; border:1px solid #ccc; border-radius:4px; width:260px; font-family:Georgia,serif; }
+        .data-table { width:100%; background:#EBE6E5; border-collapse:collapse; }
+        .data-table th { background:#d9d3d0; padding:8px 12px; }
+        .data-table td { padding:8px 12px; }
+    </style>
+</head>
+<body>
+<h1>
+    <a href="home.html">
+        <img src="https://i.ibb.co/hxKGKqGb/230b36aff7a95fea2a40d94df286f8f8-removebg-preview.png"
+             border="0" width="50px" height="50px" align="left" alt="Home">
+    </a>
+    <center><em>Print Reservation</em></center>
+</h1>
+<hr><br>
+
+<center>
+<h2><em>Print Types</em></h2>
+<table style="background-color:#EBE6E5;" border="1" width="600">
+    <tr><th>Service</th><th>Price (RM)</th></tr>
+    <tr><td align="center">Black &amp; White (per page)</td><td align="center">0.10</td></tr>
+    <tr><td align="center">Color (per page)</td><td align="center">0.50</td></tr>
+    <tr><td align="center">Double-sided</td><td align="center">+ 0.15</td></tr>
+</table>
+<br>
+
+<!-- ACTION BUTTONS -->
+<div class="action-bar">
+    <button class="btn btn-view"   onclick="showPanel('panel-view')">View Data</button>
+    <button class="btn btn-search" onclick="showPanel('panel-search')">Search Data</button>
+</div>
+
+<!-- PRINT FORM -->
+<div class="panel" id="panel-form">
+    <h2><em>Print Request Form</em></h2>
+    <form action="/librarymanagementsystem/saveprint.php" method="POST" enctype="multipart/form-data">
+        <label>Your Name:</label>
+        <input type="text" name="fullname" placeholder="Enter full name">
+        &nbsp;&nbsp;
+        <label>Student ID:</label>
+        <input type="text" name="studentid" placeholder="e.g., SWE24070028"><br><br>
+
+        <label>Print Type:</label>
+        <select name="printtype">
+            <option>Black &amp; White</option>
+            <option>Color</option>
+        </select><br><br>
+
+        <label>Number of Pages:</label>
+        <input type="text" name="pages" placeholder="e.g., 10"><br><br>
+
+        <input type="checkbox" name="doublesided" value="Yes"> Double-sided<br><br>
+
+        <label>Copies:</label>
+        <input type="text" name="copies" placeholder="1"><br><br>
+
+        <label>Pickup Time:</label>
+        <select name="pickuptime">
+            <option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
+            <option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
+        </select><br><br>
+
+        <label><em>Upload your file (max 10MB):</em></label><br>
+        <input type="file" name="printfile"><br><br>
+
+        <input type="checkbox"> I agree to follow library rules<br><br>
+
+        <button type="submit" class="btn btn-submit">Submit Print Request</button>
+        <button type="reset"  class="btn btn-cancel">Clear</button>
+    </form>
+</div>
+
+<!-- VIEW PANEL -->
+<div class="panel panel-wide hidden" id="panel-view">
+    <h2><em>All Print Requests</em></h2>
+    <div id="view-content"><em>Loading...</em></div>
+    <br>
+    <button class="btn btn-cancel" onclick="hidePanel('panel-view')">Close</button>
+</div>
+
+<!-- SEARCH PANEL -->
+<div class="panel panel-wide hidden" id="panel-search">
+    <h2><em>Search Print Requests</em></h2>
+    <input class="search-box" type="text" id="search-input" placeholder="Enter Student ID or Name...">
+    <button class="btn btn-search" onclick="doSearch()">Search</button>
+    <br><br>
+    <div id="search-content"></div>
+    <br>
+    <button class="btn btn-cancel" onclick="hidePanel('panel-search')">Close</button>
+</div>
+
+<!-- EDIT PANEL -->
+<div class="panel hidden" id="panel-edit">
+    <h2><em>Edit Print Request</em></h2>
+    <form method="POST" action="/librarymanagementsystem/editprint.php">
+        <input type="hidden" name="printid" id="edit-id">
+
+        <label>Full Name:</label>
+        <input type="text" name="fullname" id="edit-fullname"><br><br>
+
+        <label>Student ID:</label>
+        <input type="text" name="studentid" id="edit-studentid"><br><br>
+
+        <label>Print Type:</label>
+        <select name="printtype" id="edit-printtype">
+            <option value="Black &amp; White">Black &amp; White</option>
+            <option value="Color">Color</option>
+        </select><br><br>
+
+        <label>Pages:</label>
+        <input type="text" name="pages" id="edit-pages"><br><br>
+
+        <label>Copies:</label>
+        <input type="text" name="copies" id="edit-copies"><br><br>
+
+        <label>Double-sided:</label>
+        <select name="doublesided" id="edit-doublesided">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select><br><br>
+
+        <label>Pickup Time:</label>
+        <select name="pickuptime" id="edit-pickuptime">
+            <option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
+            <option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
+        </select><br><br>
+
+        <button type="submit" class="btn btn-edit">Save Changes</button>
+        <button type="button" class="btn btn-cancel" onclick="hidePanel('panel-edit')">Cancel</button>
+    </form>
+</div>
+
+<br>
+<hr><br>
+<h2><em>Contact Library</em></h2>
+<p><a href="mailto:library@student.edu">Email: library@student.edu</a> | Phone: (+60 13-460 9679) | Location: 1st Floor, KT1</p>
+</center>
+
+<script>
+function showPanel(id) {
+    document.getElementById('panel-form').classList.add('hidden');
+    ['panel-view','panel-search','panel-edit'].forEach(p => document.getElementById(p).classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    if (id === 'panel-view') loadView();
+    document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+function hidePanel(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.getElementById('panel-form').classList.remove('hidden');
+}
+function loadView() {
+    fetch('/librarymanagementsystem/getprints.php')
+        .then(r => r.json())
+        .then(data => renderTable(data, 'view-content'))
+        .catch(() => { document.getElementById('view-content').innerHTML = '<em>Could not load data. Make sure the server is running.</em>'; });
+}
+function doSearch() {
+    const q = document.getElementById('search-input').value.trim();
+    if (!q) return;
+    fetch('/librarymanagementsystem/getprints.php?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => renderTable(data, 'search-content'))
+        .catch(() => { document.getElementById('search-content').innerHTML = '<em>Could not load data.</em>'; });
+}
+function renderTable(data, targetId) {
+    const target = document.getElementById(targetId);
+    if (!data.length) { target.innerHTML = '<em>No records found.</em>'; return; }
+    let html = '<div style="overflow-x:auto;"><table class="data-table" border="1"><tr>'
+        + '<th>#</th><th>Name</th><th>Student ID</th><th>Type</th><th>Pages</th><th>Copies</th><th>Double-sided</th><th>Total (RM)</th><th>Pickup</th><th>Actions</th>'
+        + '</tr>';
+    data.forEach(row => {
+        const pid = row.printid || row.PRINTID || '-';
+        html += `<tr>
+            <td>${pid}</td><td>${row.fullname}</td><td>${row.studentid}</td>
+            <td>${row.printtype}</td><td>${row.pages}</td><td>${row.copies}</td>
+            <td>${row.doublesided}</td><td>${parseFloat(row.totalcost).toFixed(2)}</td>
+            <td>${row.pickuptime}</td>
+            <td>
+                <button class="btn btn-edit" onclick='openEdit(${JSON.stringify(row)})'>Edit</button>
+                <button class="btn btn-delete" onclick="deleteRecord('${pid}')">Delete</button>
+            </td>
+        </tr>`;
+    });
+    html += '</table></div>';
+    target.innerHTML = html;
+}
+function openEdit(row) {
+    document.getElementById('edit-id').value = row.printid || row.PRINTID || '';
+    document.getElementById('edit-fullname').value    = row.fullname;
+    document.getElementById('edit-studentid').value   = row.studentid;
+    document.getElementById('edit-printtype').value   = row.printtype;
+    document.getElementById('edit-pages').value       = row.pages;
+    document.getElementById('edit-copies').value      = row.copies;
+    document.getElementById('edit-doublesided').value = row.doublesided;
+    document.getElementById('edit-pickuptime').value  = row.pickuptime;
+    showPanel('panel-edit');
+}
+function deleteRecord(id) {
+    if (!confirm('Delete print request #' + id + '?')) return;
+    fetch('/librarymanagementsystem/deleteprint.php?id=' + id)
+        .then(r => r.text())
+        .then(msg => { alert(msg); loadView(); })
+        .catch(() => alert('Delete failed.'));
+}
+</script>
+</body>
+</html>
