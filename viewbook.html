@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Library Book Reservation</title>
+    <style>
+        body { background-color:#F5F3EF; font-family: Georgia, serif; }
+        .btn { padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-size:14px; margin:4px; font-family:Georgia,serif; }
+        .btn-submit  { background-color:#4A7C59; color:white; }
+        .btn-view    { background-color:#2E6DA4; color:white; }
+        .btn-search  { background-color:#8B6914; color:white; }
+        .btn-edit    { background-color:#C47B2B; color:white; font-size:12px; padding:6px 12px; }
+        .btn-delete  { background-color:#B03A3A; color:white; font-size:12px; padding:6px 12px; }
+        .btn-cancel  { background-color:#888; color:white; }
+        .btn:hover   { opacity:0.85; }
+        .panel { background:#EBE6E5; border-radius:8px; padding:24px; max-width:900px; margin:0 auto 24px; }
+        .panel-wide { max-width:98%; }
+        .hidden { display:none; }
+        input[type=text], input[type=date], select { padding:6px 10px; border:1px solid #ccc; border-radius:4px; font-family:Georgia,serif; }
+        label { font-weight:bold; }
+        .action-bar { margin:18px 0; }
+        .search-box { padding:8px 12px; border:1px solid #ccc; border-radius:4px; width:260px; font-family:Georgia,serif; }
+        .data-table { width:100%; background:#EBE6E5; border-collapse:collapse; }
+        .data-table th { background:#d9d3d0; padding:8px 12px; }
+        .data-table td { padding:8px 12px; }
+    </style>
+</head>
+<body>
+<h1>
+    <a href="home.html">
+        <img src="https://i.ibb.co/hxKGKqGb/230b36aff7a95fea2a40d94df286f8f8-removebg-preview.png"
+             border="0" width="50px" height="50px" align="left" alt="Home">
+    </a>
+    <center>Book Reservation</center>
+</h1>
+<hr><br>
+
+<center>
+<h2><em>Available Books</em></h2>
+<table style="background-color:#EBE6E5;" border="1" width="600">
+    <tr><th>Book Title</th><th>Author</th><th>Category</th><th>Status</th></tr>
+    <tr><td align="center">Pride and Prejudice</td><td align="center">Jane Austen</td><td align="center">Romance</td><td align="center" style="color:#2d6a2d;font-weight:bold;">Available</td></tr>
+    <tr><td align="center">HTML Basics</td><td align="center">John Smith</td><td align="center">Computer</td><td align="center" style="color:#2d6a2d;font-weight:bold;">Available</td></tr>
+    <tr><td align="center">Python Programming</td><td align="center">Sarah Johnson</td><td align="center">Computer</td><td align="center" style="color:#a33;font-weight:bold;">Checked Out</td></tr>
+    <tr><td align="center">The Hunger Games</td><td align="center">Suzanne Collins</td><td align="center">Action</td><td align="center" style="color:#2d6a2d;font-weight:bold;">Available</td></tr>
+</table>
+<br>
+
+<!-- ACTION BUTTONS -->
+<div class="action-bar">
+    <button class="btn btn-view"   onclick="showPanel('panel-view')">View Data</button>
+    <button class="btn btn-search" onclick="showPanel('panel-search')">Search Data</button>
+</div>
+
+<!-- RESERVATION FORM -->
+<div class="panel" id="panel-form">
+    <h2><em>Book Reservation Form</em></h2>
+    <form action="/librarymanagementsystem/savebook.php" method="POST">
+        <label>Your Name:</label>
+        <input type="text" name="fullname" placeholder="Enter full name">
+        &nbsp;&nbsp;
+        <label>Student ID:</label>
+        <input type="text" name="studentid" placeholder="e.g., SWE24070028"><br><br>
+
+        <label>Email:</label>
+        <input type="text" name="email" placeholder="your@email.com"><br><br>
+
+        <label>Pickup Date:</label>
+        <input type="date" name="pickupdate">
+        &nbsp;&nbsp;
+        <label>Return Date:</label>
+        <input type="date" name="returndate"><br><br>
+
+        <input type="checkbox"> I have read and agree to the library borrowing rules<br><br>
+
+        <button type="submit" class="btn btn-submit">Submit Reservation</button>
+        <button type="reset"  class="btn btn-cancel">Clear</button>
+    </form>
+</div>
+
+<!-- VIEW PANEL -->
+<div class="panel panel-wide hidden" id="panel-view">
+    <h2><em>All Book Reservations</em></h2>
+    <div id="view-content"><em>Loading...</em></div>
+    <br>
+    <button class="btn btn-cancel" onclick="hidePanel('panel-view')">Close</button>
+</div>
+
+<!-- SEARCH PANEL -->
+<div class="panel panel-wide hidden" id="panel-search">
+    <h2><em>Search Reservations</em></h2>
+    <input class="search-box" type="text" id="search-input" placeholder="Enter Student ID or Name...">
+    <button class="btn btn-search" onclick="doSearch()">Search</button>
+    <br><br>
+    <div id="search-content"></div>
+    <br>
+    <button class="btn btn-cancel" onclick="hidePanel('panel-search')">Close</button>
+</div>
+
+<!-- EDIT PANEL -->
+<div class="panel hidden" id="panel-edit">
+    <h2><em>Edit Book Reservation</em></h2>
+    <form id="edit-form" method="POST" action="/librarymanagementsystem/editbook.php">
+        <input type="hidden" name="bookreserveid" id="edit-id">
+
+        <label>Full Name:</label>
+        <input type="text" name="fullname" id="edit-fullname"><br><br>
+
+        <label>Student ID:</label>
+        <input type="text" name="studentid" id="edit-studentid"><br><br>
+
+        <label>Email:</label>
+        <input type="text" name="email" id="edit-email"><br><br>
+
+        <label>Pickup Date:</label>
+        <input type="date" name="pickupdate" id="edit-pickupdate"><br><br>
+
+        <label>Return Date:</label>
+        <input type="date" name="returndate" id="edit-returndate"><br><br>
+
+        <button type="submit" class="btn btn-edit">Save Changes</button>
+        <button type="button" class="btn btn-cancel" onclick="hidePanel('panel-edit')">Cancel</button>
+    </form>
+</div>
+
+<br>
+<hr>
+<center>
+<h2><em><b>!!</b> Library Rules <b>!!</b></em></h2>
+- Books can be borrowed for 14 days<br>
+- Late fee: RM1.00 per day<br>
+- Maximum 5 books per student<br>
+- Renew online before due date<br>
+</center>
+<br>
+<hr>
+<h2><em>Contact Library</em></h2>
+<p><a href="mailto:library@student.edu">Email: library@student.edu</a> | Phone: (+60 13-460 9679) | Location: 1st Floor, KT1</p>
+</center>
+
+<script>
+function showPanel(id) {
+    document.getElementById('panel-form').classList.add('hidden');
+    ['panel-view','panel-search','panel-edit'].forEach(p => document.getElementById(p).classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    if (id === 'panel-view') loadView();
+    document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+function hidePanel(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.getElementById('panel-form').classList.remove('hidden');
+}
+function loadView() {
+    fetch('/librarymanagementsystem/getbooks.php')
+        .then(r => r.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.error) {
+                    document.getElementById('view-content').innerHTML = '<em>Error: ' + data.error + '</em>';
+                } else {
+                    renderTable(data, 'view-content');
+                }
+            } catch(e) {
+                document.getElementById('view-content').innerHTML = '<em>PHP error: ' + text + '</em>';
+            }
+        })
+        .catch(err => { document.getElementById('view-content').innerHTML = '<em>Network error: ' + err + '</em>'; });
+}
+function doSearch() {
+    const q = document.getElementById('search-input').value.trim();
+    if (!q) return;
+    fetch('/librarymanagementsystem/getbooks.php?q=' + encodeURIComponent(q))
+        .then(r => r.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.error) {
+                    document.getElementById('search-content').innerHTML = '<em>Error: ' + data.error + '</em>';
+                } else {
+                    renderTable(data, 'search-content');
+                }
+            } catch(e) {
+                document.getElementById('search-content').innerHTML = '<em>PHP error: ' + text + '</em>';
+            }
+        })
+        .catch(err => { document.getElementById('search-content').innerHTML = '<em>Network error: ' + err + '</em>'; });
+}
+function renderTable(data, targetId) {
+    const target = document.getElementById(targetId);
+    if (!data.length) { target.innerHTML = '<em>No records found.</em>'; return; }
+    let html = '<div style="overflow-x:auto;"><table class="data-table" border="1"><tr>'
+        + '<th>#</th><th>Name</th><th>Student ID</th><th>Email</th><th>Pickup</th><th>Return</th><th>Actions</th>'
+        + '</tr>';
+    data.forEach(row => {
+        const rid = row.bookreserveid || row.BOOKRESERVEID || '-';
+        html += `<tr>
+            <td>${rid}</td><td>${row.fullname}</td><td>${row.studentid}</td>
+            <td>${row.email}</td><td>${row.pickupdate}</td><td>${row.returndate}</td>
+            <td>
+                <button class="btn btn-edit" onclick='openEdit(${JSON.stringify(row)})'>Edit</button>
+                <button class="btn btn-delete" onclick="deleteRecord('${rid}')">Delete</button>
+            </td>
+        </tr>`;
+    });
+    html += '</table></div>';
+    target.innerHTML = html;
+}
+function openEdit(row) {
+    document.getElementById("edit-id").value = row.bookreserveid || row.BOOKRESERVEID || '';
+    document.getElementById('edit-fullname').value   = row.fullname;
+    document.getElementById('edit-studentid').value  = row.studentid;
+    document.getElementById('edit-email').value      = row.email;
+    document.getElementById('edit-pickupdate').value = row.pickupdate;
+    document.getElementById('edit-returndate').value = row.returndate;
+    showPanel('panel-edit');
+}
+function deleteRecord(id) {
+    if (!confirm('Delete reservation #' + id + '?')) return;
+    fetch('/librarymanagementsystem/deletebook.php?id=' + id)
+        .then(r => r.text())
+        .then(msg => { alert(msg); loadView(); })
+        .catch(() => alert('Delete failed.'));
+}
+</script>
+</body>
+</html>
+
